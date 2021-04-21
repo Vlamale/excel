@@ -3,24 +3,30 @@ const CODES = {
   Z: 90
 }
 
-function toCell() {
+function toCell(index) {
   return `
-  <div class="cell" contenteditable=""></div>
+  <div class="cell" contenteditable="" data-index="${index}"></div>
   `
 }
 
-function createCol(letter) {
+function toColumn(letter, index) {
   return `
-    <div class="column">
+    <div class="column" data-type="resizable" data-index="${index}" 
+    onmousedown="return false">
         ${letter}
+        <div class="col-resize" data-resize="col"></div>
     </div>
     `
 }
 
 function createRow(content, count = '') {
+  const resize = count ? '<div class="row-resize" data-resize="row"></div>' : ''
   return `
-  <div class="row">
-  <div class="row-info">${count}</div>
+  <div class="row" data-type="resizable">
+  <div class="row-info" onmousedown="return false">
+  ${count}
+  ${resize}
+  </div>
   <div class="row-data">${content}</div>
   </div>
   `
@@ -35,8 +41,8 @@ export function createTable(rowsCount = 15) {
   // Generates letters in the first line
   for (let i = 0; i <= colsCount; i++) {
     const letter = String.fromCharCode(CODES.A + i)
-    worksCols.push(toCell())
-    cols.push(createCol(letter))
+    worksCols.push(toCell(i))
+    cols.push(toColumn(letter, i))
   }
   // Appends the generated string as the first element of the array
   rows.push(createRow(cols.join('')))
