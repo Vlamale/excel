@@ -3,15 +3,23 @@ const CODES = {
   Z: 90
 }
 
-function toCell(index) {
-  return `
-  <div class="cell" contenteditable="" data-index="${index}"></div>
+function toCell(row) {
+  return function(_, col) {
+    return `
+  <div 
+    class="cell" 
+    contenteditable 
+    data-col="${col}" 
+    data-type="cell"
+    data-id="${row}:${col}">
+  </div>
   `
+  }
 }
 
 function toColumn(letter, index) {
   return `
-    <div class="column" data-type="resizable" data-index="${index}" 
+    <div class="column" data-type="resizable" data-col="${index}" 
     onmousedown="return false">
         ${letter}
         <div class="col-resize" data-resize="col"></div>
@@ -19,12 +27,12 @@ function toColumn(letter, index) {
     `
 }
 
-function createRow(content, count = '') {
-  const resize = count ? '<div class="row-resize" data-resize="row"></div>' : ''
+function createRow(index, content) {
+  const resize = index ? '<div class="row-resize" data-resize="row"></div>' : ''
   return `
   <div class="row" data-type="resizable">
   <div class="row-info" onmousedown="return false">
-  ${count}
+  ${index ? index : ''}
   ${resize}
   </div>
   <div class="row-data">${content}</div>
@@ -32,25 +40,29 @@ function createRow(content, count = '') {
   `
 }
 
+function toChar(_, index) {
+  return String.fromCharCode(CODES.A + index)
+}
+
 export function createTable(rowsCount = 15) {
   const colsCount = CODES.Z - CODES.A
   const rows = []
-  const cols = []
-  const worksCols = []
 
-  // Generates letters in the first line
-  for (let i = 0; i <= colsCount; i++) {
-    const letter = String.fromCharCode(CODES.A + i)
-    worksCols.push(toCell(i))
-    cols.push(toColumn(letter, i))
-  }
-  // Appends the generated string as the first element of the array
-  rows.push(createRow(cols.join('')))
+  const cols = new Array(colsCount)
+      .fill('')
+      .map(toChar)
+      .map(toColumn)
+      .join('')
 
-  // Generates rows based on the "rowsCount" parameter specified
-  // in the function argument
-  for (let i = 0; i < rowsCount; i++) {
-    rows.push(createRow(worksCols.join(''), i+1))
+  rows.push(createRow(null, cols))
+
+  for (let row = 0; row < rowsCount; row++) {
+    const cells = new Array(colsCount)
+        .fill('')
+        .map(toCell(row))
+        .join('')
+
+    rows.push(createRow(row + 1, cells))
   }
   return rows.join('')
 }
