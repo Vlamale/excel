@@ -3,7 +3,8 @@ import {
   CHANGE_STYLES,
   TABLE_RESIZE,
   APPLY_STYLE,
-  CHENGE_TITLE
+  CHENGE_TITLE,
+  UPDATE_DATE
 } from './types'
 
 export function rootReduser(state, action) {
@@ -17,15 +18,14 @@ export function rootReduser(state, action) {
       field = 'dataState'
       return {
         ...state,
-        currentText:
-        action.data.value,
+        currentText: action.data.value,
         [field]: value(state, field, action)
       }
     case CHANGE_STYLES:
       return {...state, currentStyles: action.data}
     case APPLY_STYLE:
       field = 'stylesState'
-      val = state[field] || {}
+      val = {...state[field]} || {}
       action.data.ids.forEach(id => {
         val[id] = {...val[id], ...action.data.value}
       })
@@ -36,12 +36,14 @@ export function rootReduser(state, action) {
       }
     case CHENGE_TITLE:
       return {...state, title: action.data}
+    case UPDATE_DATE:
+      return {...state, openedDate: new Date().toJSON()}
     default: return state
   }
 }
 
 function value(state, field, action) {
-  const val = state[field] || {}
+  const val = {...state[field]} || {}
   val[action.data.id] = action.data.value
   return val
 }
